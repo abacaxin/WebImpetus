@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@layer base {
+  html {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  /* O foco precisa ser visivel DE VERDADE sobre fundo quase preto — outline fino
+     em cinza desaparece. Vermelho brilhante com offset le como parte da marca. */
+  :focus-visible {
+    outline: 2px solid var(--color-red-bright);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-red);
+    color: var(--color-text);
+  }
+
+  /* Ancoras de navegacao nao podem ficar sob o header fixo. */
+  [id] {
+    scroll-margin-top: 6rem;
+  }
+}
+
+@layer utilities {
+  /**
+   * Saida real do sistema (respostas do Impetus, caminhos de disco, listagens).
+   *
+   * `overflow-wrap: anywhere` nao e cosmetico: um caminho do Windows como
+   * C:\Users\Daniel\Documents\Codes\DMG\FloraBeauty e um unico token sem espaco,
+   * e sem isso ele estoura o container e da scroll horizontal na pagina inteira
+   * no mobile. Toda saida de sistema passa por aqui, entao a regra vale para
+   * qualquer mensagem nova sem precisar lembrar dela.
+   */
+  .saida-sistema {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /**
+   * As laminas da marca nascem no ponto de convergencia e se abrem em leque.
+   *
+   * A origem do transform e exatamente (110, 50) — o mesmo ponto onde todas as
+   * laminas terminam no desenho. Por isso elas parecem brotar do ponto, e nao
+   * crescer de um canto qualquer. `transform-box: view-box` faz o transform-origin
+   * ser lido em coordenadas do viewBox, nao da bounding box de cada path.
+   *
+   * `--i` e a distancia ate a lamina central: a do meio sai primeiro, as externas
+   * seguem. `backwards` segura o estado inicial durante o atraso, senao elas
+   * piscariam visiveis antes de comecar.
+   */
+  .lamina-convergente {
+    transform-box: view-box;
+    transform-origin: 110px 50px;
+    animation: convergir 760ms var(--ease-out-soft) backwards;
+    animation-delay: calc(var(--i, 0) * 80ms);
+  }
+}
+
+@keyframes convergir {
+  from {
+    transform: scale(0.06);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/**
+ * Reducao de movimento.
+ *
+ * Nao e "animacao mais curta" — e ausencia de animacao. Quem liga essa preferencia
+ * costuma faze-lo por enjoo ou vertigem, e uma transicao de 40ms ainda dispara isso.
+ * O canvas 3D nem chega a montar (ver useReducedMotion); aqui zeramos o resto.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
